@@ -1,6 +1,6 @@
 import pygame
 import sys
-from models import tello, gui
+from models import tello
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton
 
 def main():
