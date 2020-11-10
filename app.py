@@ -1,27 +1,23 @@
 import pygame
-import sys
-from models import tello
+from models import tello, gui
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton
 
 def main():
     # gui blocks pygame input if not created in main
-    app = QApplication(sys.argv)
-    window = QWidget()
-    window.setWindowTitle('test window')
-    window.setGeometry(0, 0, 640, 480)
-    window.move(60, 15)
-    b = QPushButton('TEST', parent=window)
-    b.move(60, 15)
-    b.clicked.connect(testButtonPress)
-    window.show()
-
+    g = gui.GUI()
+    g.show()
+    
     # start pygame (used for controller and keyboard inputs)
-    # (also must been on main thread)
     pygame.init()
     con = pygame.joystick.Joystick(0)
     con.init()
+    
     drone = tello.Tello()
+    
     dx, dy, dz, yaw = 0, 0, 0, 0
+    last = [0, 0, 0, 0] 
+    # deadzone for controller sticks
+    deadzone = 20
     
     while True:
         events = pygame.event.get()
@@ -48,7 +44,7 @@ def main():
                     response = drone.send_command_with_response('command')
                     print(f'response: {response}')
 
-                #print(event.dict, event.joy, event.button, 'pressed')
+                print(event.dict, event.joy, event.button, 'pressed')
             elif event.type == pygame.JOYAXISMOTION:
                 axis = event.dict['axis']
                 value = event.dict['value']*100
@@ -74,12 +70,20 @@ def main():
                 if axis == 4 and value > 0:
                     dz = value * -1
 
-                print(f'dx: {dx} -- dy: {dy} -- dz: {dz} -- yaw: {yaw}')
-            else:
-                dx, dy, dz, yaw = 0, 0, 0, 0
+                #print(f'dx: {dx} -- dy: {dy} -- dz: {dz} -- yaw: {yaw}')
+                if dx != last[0] or dy != last[1] or dz != last[2] or yaw != last[3]:
+                    drone.test_rc(dx, dy, dz, yaw)
+                
+                # when letting go of the joystick, need to stop drone from moving
+                if dx <= deadzone and dx >= -deadzone:
+                    if dy <= deadzone and dy >= -deadzone:
+                        if dz <= deadzone and dz >= -deadzone:
+                            if yaw <= deadzone and yaw >= -deadzone:
+                                dx, dy, dz, yaw = 0, 0, 0, 0
+                                drone.test_rc(dx, dy, dz, yaw)
 
-def testButtonPress():
-    print('yooooo')
+                last = [dx, dy, dz, yaw]
+
 
 if __name__ == '__main__':
     main()
