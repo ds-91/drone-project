@@ -1,14 +1,28 @@
 import pygame
-from models import tello
+import sys
+from models import tello, gui
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton
 
 def main():
+    # gui blocks pygame input if not created in main
+    app = QApplication(sys.argv)
+    window = QWidget()
+    window.setWindowTitle('test window')
+    window.setGeometry(0, 0, 640, 480)
+    window.move(60, 15)
+    b = QPushButton('TEST', parent=window)
+    b.move(60, 15)
+    b.clicked.connect(testButtonPress)
+    window.show()
+
+    # start pygame (used for controller and keyboard inputs)
+    # (also must been on main thread)
     pygame.init()
     con = pygame.joystick.Joystick(0)
     con.init()
-
     drone = tello.Tello()
-
     dx, dy, dz, yaw = 0, 0, 0, 0
+    
     while True:
         events = pygame.event.get()
         for event in events:
@@ -20,17 +34,25 @@ def main():
                 .....
                 start - 8
             """
+
             if event.type == pygame.JOYBUTTONDOWN:
                 button = event.dict['button']
-                
+                if button == 0:
+                    response = drone.send_command_with_response('takeoff')
+                    print(f'response: {response}')
+                elif button == 1:
+                    response = drone.send_command_with_response('land')
+                    print(f'response: {response}')
                 # Initialize drone to accept commands
-                if button == 8:
+                elif button == 8:
                     response = drone.send_command_with_response('command')
-                    print(f'response: {response}') 
+                    print(f'response: {response}')
+
                 #print(event.dict, event.joy, event.button, 'pressed')
             elif event.type == pygame.JOYAXISMOTION:
                 axis = event.dict['axis']
                 value = event.dict['value']*100
+                value = round(value, 2)
                 
                 """ direction values for LEFT joystick """
                 if axis == 1 and value < 0:
@@ -56,7 +78,8 @@ def main():
             else:
                 dx, dy, dz, yaw = 0, 0, 0, 0
 
-                
+def testButtonPress():
+    print('yooooo')
 
 if __name__ == '__main__':
     main()
