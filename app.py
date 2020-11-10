@@ -71,17 +71,18 @@ def main():
                     dz = value * -1
 
                 #print(f'dx: {dx} -- dy: {dy} -- dz: {dz} -- yaw: {yaw}')
-                if dx != last[0] or dy != last[1] or dz != last[2] or yaw != last[3]:
-                    drone.test_rc(dx, dy, dz, yaw)
                 
                 # when letting go of the joystick, need to stop drone from moving
                 if dx <= deadzone and dx >= -deadzone:
                     if dy <= deadzone and dy >= -deadzone:
-                        if dz <= deadzone and dz >= -deadzone:
-                            if yaw <= deadzone and yaw >= -deadzone:
-                                dx, dy, dz, yaw = 0, 0, 0, 0
-                                drone.test_rc(dx, dy, dz, yaw)
+                        dx, dy = 0, 0
+                if dz <= deadzone and dz >= -deadzone:
+                    if yaw <= deadzone and yaw >= -deadzone:
+                        dz, yaw = 0, 0
 
+                if dx != last[0] or dy != last[1] or dz != last[2] or yaw != last[3]:
+                    drone.test_rc(dx, dy, dz, yaw)
+                
                 last = [dx, dy, dz, yaw]
 
 
