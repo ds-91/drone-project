@@ -23,6 +23,7 @@ def main():
         events = pygame.event.get()
         for event in events:
             """ Controller Input Mappings (xbox one)
+                https://www.pygame.org/docs/ref/joystick.html
                 a - 0
                 b - 1
                 x - 2
@@ -50,21 +51,27 @@ def main():
                 value = event.dict['value']*100
                 value = round(value, 2)
                 
-                """ direction values for LEFT joystick """
-                if axis == 1 and value < 0:
-                    dx = abs(value)
-                if axis == 1 and value > 0:
-                    dx = value * -1
+                """ direction values for LEFT joystick
+                    axis 0 is left / right
+                    axis 1 is up / down
+                """
                 if axis == 0 and value < 0:
-                    dy = abs(value)
+                    dx = value
                 if axis == 0 and value > 0:
+                    dx = abs(value)
+                if axis == 1 and value < 0:
+                    dy = abs(value)
+                if axis == 1 and value > 0:
                     dy = value * -1
 
-                """ direction values for RIGHT joystick """
+                """ direction values for RIGHT joystick
+                    axis 3 is left / right
+                    axis 4 is up / down
+                """
                 if axis == 3 and value < 0:
-                    yaw = abs(value)
+                    yaw = value
                 if axis == 3 and value > 0:
-                    yaw = value * -1
+                    yaw = abs(value)
                 if axis == 4 and value < 0:
                     dz = abs(value)
                 if axis == 4 and value > 0:
@@ -82,6 +89,7 @@ def main():
 
                 if dx != last[0] or dy != last[1] or dz != last[2] or yaw != last[3]:
                     drone.test_rc(dx, dy, dz, yaw)
+                    drone.send_command_continuous(f'rc {dx} {dy} {dz} {yaw}')
                 
                 last = [dx, dy, dz, yaw]
 

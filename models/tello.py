@@ -95,7 +95,6 @@ class Tello:
     def test_rc(self, dx, dy, dz, yaw):
         print(f'I received: {dx}, {dy}, {dz}, {yaw}!')
 
-
     def emergency(self):
         self.socket.sendto('emergency'.encode('utf-8'), self.tello_addr)
         self.end()
