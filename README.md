@@ -26,9 +26,8 @@ Install from requirements.txt:
 pip install -r requirements.txt
 ```
 
-cd into the app folder and run app.py
+run app.py
 ```bash
-cd app
 python app.py
 ```
 
