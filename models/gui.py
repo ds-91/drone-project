@@ -21,10 +21,14 @@ class GUI:
 
         self.drone = None
         
-        thread = Thread(target = self.show_video_feed)
-        thread.start()
+        #thread = Thread(target = self.show_video_feed)
+        #thread.start()
 
     def show_video_feed(self):
+        # wait 10 seconds to make sure feed starts before capturing
+        # otherwise it fails until app restarted
+        print('sleeping for 10 sec')
+        time.sleep(10)
         cap = cv2.VideoCapture('udp://0.0.0.0:11111', cv2.CAP_FFMPEG)
         if not cap.isOpened():
             print('cap not opened!!')

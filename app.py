@@ -1,6 +1,7 @@
 import pygame
 from models import tello, gui
 from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton
+from threading import Thread
 
 def main():
     drone = tello.Tello()
@@ -47,7 +48,10 @@ def main():
                 elif button == 10:
                     response = drone.send_command_with_response('streamon')
                     print(f'response: {response}')
-                    g.show_video_feed()
+                    # run video feed in separate thread
+                    thread = Thread(target=g.show_video_feed, args=())
+                    thread.start()
+                    #g.show_video_feed()
                 
                 print(event.dict, event.joy, event.button, 'pressed')
             elif event.type == pygame.JOYAXISMOTION:
