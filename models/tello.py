@@ -16,18 +16,11 @@ class Tello:
         self.tello_port = 8889
         self.tello_addr = (self.tello_ip, self.tello_port)
 
-        #self.tello_video_ip = '0.0.0.0'
-        #self.tello_video_port = 11111
-        #self.tello_video_addr = (self.tello_video_ip, self.tello_video_port)
-
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.socket.bind(self.local_addr)
 
         self.response = None
         self.state = None
-        #self.video_data = None
-        #self.video_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #self.video_socket.bind(self.tello_video_addr)
 
         self.tello_state_ip = '0.0.0.0'
         self.tello_state_port = 8890
@@ -39,44 +32,17 @@ class Tello:
         thread = threading.Thread(target=self.receiver, args=())
         thread.daemon = True
         thread.start()
-        
-        # State data on new thread
-        state_thread = threading.Thread(target=self.state_receiver, args=())
-        state_thread.daemon = True
-        state_thread.start()
 
-        # Video data on new thread
-        #video_thread = threading.Thread(target=self.video_receiver, args=())
-        #video_thread.daemon = True
-        #video_thread.start()
-    
 
     def receiver(self):
         while True:
             try:
                 self.response, _ = self.socket.recvfrom(1024)
+                self.state, _ = self.socket.recvfrom(1024)
             except Exception as e:
                 print(e)
                 break
    
-
-    def state_receiver(self):
-        while True:
-            try:
-                self.state, _ = self.state_socket.recvfrom(1024)
-            except Exception as e:
-                print(e)
-                break
-
-
-    def video_receiver(self):
-        while True:
-            try:
-                self.video_data, _ = self.video_socket.recvfrom(2048)
-            except Exception as e:
-                print(e)
-                break
-
 
     def send_command_continuous(self, cmd):
         self.socket.sendto(cmd.encode('utf-8'), self.tello_addr)
@@ -113,9 +79,7 @@ class Tello:
             key, value = item.split(':')
             state_dict[key] = value
         
-        # make json without flask
-        #return jsonify(state_dict)
-        return None
+        return state_dict
 
 
     def test_rc(self, dx, dy, dz, yaw):

@@ -1,6 +1,6 @@
 import pygame
 from models import tello, gui
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QPushButton
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget
 from threading import Thread
 
 def main():
@@ -13,14 +13,18 @@ def main():
     
     # start pygame (used for controller and keyboard inputs)
     pygame.init()
-    con = pygame.joystick.Joystick(0)
-    con.init()
+    con = None
+    try:
+        con = pygame.joystick.Joystick(0)
+        con.init()
+    except Exception as e:
+        print('No controller connected!')
 
     dx, dy, dz, yaw = 0, 0, 0, 0
     last = [0, 0, 0, 0] 
     # deadzone for controller sticks
     deadzone = 20 
-    
+
     while True:
         events = pygame.event.get()
         for event in events:
@@ -51,9 +55,21 @@ def main():
                     # run video feed in separate thread
                     thread = Thread(target=g.show_video_feed, args=())
                     thread.start()
-                    #g.show_video_feed()
+
+            # temporary keyboard input because my os update broke controller support
+            if event.type == pygame.KEYDOWN:
+                key = event.dict['key']
+                print(event.dict)
+                if key == 32:
+                    response = drone.send_command_with_response('command')
+                    print(f'response: {response}')
+                elif key == 8:
+                    response = drone.send_command_with_response('streamon')
+                    print(f'response: {response}')
+                    thread = Thread(target=g.show_video_feed, args=())
+                    thread.start()
                 
-                print(event.dict, event.joy, event.button, 'pressed')
+                #print(event.dict, event.joy, event.button, 'pressed')
             elif event.type == pygame.JOYAXISMOTION:
                 axis = event.dict['axis']
                 value = event.dict['value']*100
